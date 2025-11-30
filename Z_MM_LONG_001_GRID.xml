@@ -1,0 +1,99 @@
+*&---------------------------------------------------------------------*
+*& Report Z_MM_LONG_001_GRID
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT Z_MM_LONG_001_GRID.
+
+
+tables:mara,makt.
+
+type-pools:slis.
+
+types:begin of typ_mara,
+  matnr type mara-matnr,
+  maktx type makt-maktx,
+  matkl type mara-matkl,
+  end of typ_mara.
+data:gt_mara type standard table of typ_mara.
+
+select-options:s_matnr for mara-matnr.
+
+start-of-selection.
+  perform sub_get_data.
+  perform sub_alv_data.
+
+*&---------------------------------------------------------------------*
+*&      Form  sub_get_data
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+form sub_get_data.
+  select mara~matnr makt~maktx mara~matkl
+    into corresponding fields of table gt_mara
+    from mara
+    left join makt
+    on mara~matnr = makt~matnr and makt~spras = sy-langu
+    where mara~matnr in s_matnr.
+endform.                    "sub_get_data
+
+*&---------------------------------------------------------------------*
+*&      Form  sub_alv_data
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+form sub_alv_data.
+
+  data: ltd_cat type standard table of slis_fieldcat_alv,
+        lth_cat type slis_fieldcat_alv.
+
+  data: ls_lay type slis_layout_alv.  "alv布局
+  ls_lay-colwidth_optimize = 'X'.
+
+  lth_cat-fieldname = 'MATNR'.
+  lth_cat-seltext_s = '物料编码'.
+  append lth_cat to ltd_cat.
+  clear lth_cat.
+  lth_cat-fieldname = 'MAKTX'.
+  lth_cat-seltext_s = '描述'.
+  append lth_cat to ltd_cat.
+  clear lth_cat.
+  lth_cat-fieldname = 'MATKL'.
+  lth_cat-seltext_s = '物料组'.
+  append lth_cat to ltd_cat.
+  clear lth_cat.
+
+  call function 'REUSE_ALV_GRID_DISPLAY'
+    EXPORTING
+      i_callback_program      = sy-repid
+      i_grid_title            = '批量查询'
+      i_callback_user_command = 'USER_COMMAND'
+      is_layout               = ls_lay  "gth_lay
+      it_fieldcat             = ltd_cat
+      i_save                  = 'A'
+    TABLES
+      t_outtab                = gt_mara.
+
+endform.                    "sub_alv_data
+
+
+*&---------------------------------------------------------------------*
+*&      Form  sub_command
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->I_UCOMM    text
+*      -->I_SELFIELD text
+*----------------------------------------------------------------------*
+form USER_command using i_ucomm like sy-ucomm
+                         i_selfield type slis_selfield.
+
+  if i_ucomm = '&IC1'.
+    case i_selfield-fieldname.
+      when 'MATNR'.
+        set parameter id 'MAT' field I_selfield-value.
+        call transaction 'MM03' and skip first screen.
+    endcase.
+  endif.
+
+endform.                    "user_command
