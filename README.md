@@ -1,3 +1,7 @@
+# ⚠️ Usage Notice
+This repository is published solely for interview and technical demonstration. 
+Commercial usage, including training materials or project implementation, is strictly prohibited.
+
 # `Z_MM_LONG_001_GRID` - ABAP Report for Material Information Display
 
 
