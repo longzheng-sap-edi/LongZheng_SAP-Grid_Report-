@@ -1,7 +1,9 @@
 *&---------------------------------------------------------------------*
 *& Report Z_MM_LONG_001_GRID
-*&---------------------------------------------------------------------*
 *&
+*& Copyright (C) 2025 Long Zheng
+*& This code is for interview/demo only.
+*& Not permitted for commercial use.
 *&---------------------------------------------------------------------*
 REPORT Z_MM_LONG_001_GRID.
 
@@ -95,5 +97,6 @@ form USER_command using i_ucomm like sy-ucomm
         call transaction 'MM03' and skip first screen.
     endcase.
   endif.
+
 
 endform.                    "user_command
